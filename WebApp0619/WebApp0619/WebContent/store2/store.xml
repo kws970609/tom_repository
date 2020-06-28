@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<storeList>
+	<store>
+		<name>마르셀</name>
+		<addr>종로</addr>
+		<lati>36.1235</lati>
+		<longi>127.6589</longi>
+		<memo>스파게티</memo>
+		<icons_id>1</icons_id>
+	</store>
+	<store>
+		<name>중화루</name>
+		<addr>종각</addr>
+		<lati>37.002356</lati>
+		<longi>126.89747</longi>
+		<memo>짬뽕</memo>
+		<icons_id>2</icons_id>
+	</store>
+	<store>
+		<name>경화각</name>
+		<addr>종각</addr>
+		<lati>37.011356</lati>
+		<longi>126.77547</longi>
+		<memo>백반정식</memo>
+		<icons_id>3</icons_id>
+	</store>
+</storeList>
+
+
+

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+.wrapper {
+	width: 1004px;
+	height: 600px;
+	border: 2px solid blue;
+}
+
+.registArea {
+	width: 200px;
+	height: 600px;
+	background: yellow;
+	float: left;
+}
+
+.contentArea {
+	width: 600px;
+	height: 600px;
+	background: cyan;
+	float: left;
+}
+
+.detailArea {
+	width: 204px;
+	height: 600px;
+	background: blue;
+	float: left;
+}
+#mapArea{
+	width: 600px;
+	height: 450px;
+}
+
+#listArea{
+	width: 600px;
+	height: 150px;
+}
+div{
+	text-align: center;
+}
+</style>
+
+
+<script>
+function loadData(){
+	//비동기 통신으로, 아이콘 가져오기!!
+	getIcons();
+	initMap(); //구글맵 불러오기
+}
+
+//옵션에 부착할 아이콘 목록을 불러온는 메서드
+function getIcons(){ 
+	var httpObj = new XMLHttpRequest(); //비동기 통신 객체
+	//비동기 객체가 통신시 맞이하게 되는 각 이벤트 마다 우측의 익명함수 호출!!
+	httpObj.onreadystatechange=function(){
+		//도착하되, 서버에서 성공적인 응답이라면...
+		if(this.readyState==4 && this.status==200){
+			//alert("서버가 전송한 메세지:"+this.responseText);
+			var json = JSON.parse(this.responseText);
+			for(var i=0; i<json.iconsList.length;i++){
+				var icon = json.iconsList[i];
+				var op = document.createElement("option");
+				//<option value="3" >짬뽕사진</option>
+				op.text= icon.title;
+				op.value=icon.icons_id;
+				var icons_id = document.getElementById("icons_id");
+				icons_id.add(op); //select 박스에 option을 동적으로 부착
+			}
+		}
+	};
+	httpObj.open("GET", "/store/icons.jsp", true); //준비
+	httpObj.send(); //통신 시작!!
+}
+
+//비동기 요청으로 파라미터 전송하기!!
+function regist(){
+	var httpObj = new XMLHttpRequest();
+	
+	httpObj.open("POST", "/store/regist.jsp", true);
+	httpObj.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	var name = document.getElementById("name").value;
+	var addr = document.getElementById("addr").value;
+	var lati = document.getElementById("lati").value;
+	var longi = document.getElementById("longi").value;
+	var icons_id = document.getElementById("icons_id").value;
+	var memo = document.getElementById("memo").value;
+	
+	//요청 결과 가져오기!!
+	httpObj.onreadystatechange=function(){
+		if(this.readyState==4 && this.status==200){
+			if(this.responseText==1){
+				alert("등록성공");
+			}else{
+				alert("등록실패");
+			}
+		}
+	}
+	
+	httpObj.send("name="+name+"&addr="+addr+"&lati="+lati+"&longi="+longi+"&icons_id="+icons_id+"&memo="+memo);
+}
+
+//목록
+function getList(){
+	var xmlRequest = new XMLHttpRequest();
+	
+	xmlRequest.onreadystatechange=function(){
+		if(this.readyState==4 && this.status==200){
+			var json=JSON.parse(this.responseText);
+			printData(json);
+		}
+	};
+	//통신준비
+	xmlRequest.open("GET","/store/data.jsp", true);
+	xmlRequest.send();
+}	
+
+//서버로부터 응답받은 json문자열을 이용하여 화면출력!!
+function printData(json){
+	
+	var listArea = document.querySelector(".listArea");
+	var tag ="<table width=\"100%\" border=\"1px\">";
+	tag+="<tr>";
+	tag+="<td>No</td>";
+	tag+="<td>가게명</td>";
+	tag+="<td>주소</td>";
+	tag+="<td>위도</td>";
+	tag+="<td>경도</td>";
+	tag+="<td>메모</td>";
+	tag+="<td>아이콘</td>";
+	var total= json.storeList.length;
+	for(var i=0; i<json.storeList.length; i++){
+		var obj = json.storeList[i];
+		tag+="<tr>";
+		tag+="<td onClick=\"select("+obj.store_id+")\">"+total--+"</td>";
+		tag+="<td onClick=\"select("+obj.store_id+")\">"+obj.name+"</td>";
+		tag+="<td onClick=\"select("+obj.store_id+")\">"+obj.addr+"</td>";
+		tag+="<td onClick=\"select("+obj.store_id+")\">"+obj.lati+"</td>";
+		tag+="<td onClick=\"select("+obj.store_id+")\">"+obj.longi+"</td>";
+		tag+="<td onClick=\"select("+obj.store_id+")\">"+obj.memo+"</td>";
+		tag+="<td onClick=\"select("+obj.store_id+")\"><img width=\"25px\" src=\"/icons/"+obj.filename+"\"></td>";
+		tag+="</tr>";
+	}
+	listArea.innerHTML= tag;
+}
+
+function select(num){
+	var xmlRequest = new XMLHttpRequest();
+	xmlRequest.onreadystatechange=function(){
+		if(this.readyState==4 && this.status==200){
+			var json = JSON.parse(this.responseText);
+			printDataSingle(json);
+		}
+	}
+	xmlRequest.open("GET","/store/content.jsp?store_id="+num, true);
+	xmlRequest.send();
+}
+
+function printDataSingle(json){
+	var store_id2 = document.getElementById("store_id2");
+	var name2 = document.getElementById("name2");
+	var addr2 = document.getElementById("addr2");
+	var lati2 = document.getElementById("lati2");
+	var longi2= document.getElementById("longi2");
+	var icons_id2 = doucment.getElementById("icons_id2");
+	var memo2 = document.getElementById("memo");
+	
+	//값을 입력하자!
+	store_id2.value = json.store_id;
+	name2.value= json.name;
+	addr2.value= json.addr;
+	lati2.value= json.lati;
+	longi2.value= json.longi;
+	icons_id2.value= json.icons_id;
+	memo2.value= json.memo;
+}
+
+function initMap() {
+	var mapProp = {
+		center : new google.maps.LatLng(51.508742, -0.120850),
+		zoom : 5,
+	};
+	var map = new google.maps.Map(document.getElementById("mapArea"),mapProp);
+}
+</script>
+</head>
+<body>
+	<div class="wrapper">
+		<div class="registArea">
+			<input type="text" id="name" placeholder="맛집명"/>
+			<input type="text" id="addr" placeholder="주소"/>
+			<input type="text" id="lati" placeholder="위도"/>
+			<input type="text" id="longi" placeholder="경도"/>
+			<select id="icons_id"></select>
+			<textarea rows="5" id="memo" placeholder="설명"></textarea>
+			<button onClick="regist()">등록</button>
+			<button onClick="getList()">목록</button>
+		</div>
+		<div class="contentArea">
+			<div id="listArea" class="listArea"></div>
+			<div id="mapArea">지도 영역</div>
+		</div>
+		
+		<div class="detailArea">
+			<input type="hidden" id="store_id2">
+			<input type="text" id="name2"/>
+			<input type="text" id="addr2"/>
+			<input type="text" id="lati2"/>
+			<input type="text" id="longi2"/>
+			<select id="icons_id2">
+				<option>받아올 아이콘</option>
+			</select>
+			<textarea rows="5" id="memo2"></textarea>
+			<button>수정</button>
+			<button>삭제</button>
+		
+		</div>
+
+	</div>
+</body>
+</html>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCF_BusYmJ4h-tz1K_AvfkZItO5K4Z76xI&callback=loadData"></script>
+
+
+
+
+
+
+
+
+
+
+

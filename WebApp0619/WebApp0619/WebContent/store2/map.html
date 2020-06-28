@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>지도</title>
+<style>
+#mapArea{
+	width: 600px;
+	height: 450px;
+}
+
+</style>
+<script>
+var map; //현재 사용중인 지도객체의 전역변수!!!
+
+function initMap() {
+	console.log("부모컨테이너의 json"+parent.json);
+	var mapProp = {
+		center : new google.maps.LatLng(37.566426, 126.981243),
+		zoom : 7
+	};
+	map = new google.maps.Map(document.getElementById("mapArea"),mapProp);
+	
+	printMarker();
+}
+//지도에 아이콘 오버레이(over) 하자!!
+function printMarker(){
+	for(var i=0; i<parent.json.storeList.length; i++){
+		var obj = parent.json.storeList[i];
+	
+		//마커 객체 한개를 생성!!
+		var marker = new google.maps.Marker({
+				position: new google.maps.LatLng(obj.lati, obj.longi),
+				animation:google.maps.Animation.BOUNCE,
+				icon:{
+					url:'/icons/'+obj.filename,
+					scaledSize:new google.maps.Size(35,35)
+				}
+			});
+		marker.setMap(map); //생성된 마커를 지도에 반영하기!!
+	}
+}
+
+
+</script>
+</head>
+<body>
+	<div id="mapArea">지도 영역</div>
+</body>
+</html>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCF_BusYmJ4h-tz1K_AvfkZItO5K4Z76xI&callback=initMap"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

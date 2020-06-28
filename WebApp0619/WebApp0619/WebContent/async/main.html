@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SPA 만들기</title>
+<style>
+.wrapper{
+	width:1000px;
+	height:600px;
+	margin:auto;
+	border:2px solid red;
+	float: left;
+}
+.inputArea{
+	width:20%;
+	height:600px;
+	background: yellow;
+	float: left;
+}
+.listArea{
+	width:60%;
+	height:600px;
+	background: cyan;
+	float: left;
+}
+.detailArea{
+	width:20%;
+	height:600px;
+	background: orange;
+	float: left;
+}
+
+
+
+</style>
+<script>
+/*
+ Ajax란?
+-자바 스크립트를 이용한 비동기 통신 기술을 의미하는데.
+	순수한 자바스크립트를 이용한 방법과 JQuery를 이용하는 방법이 있다..
+
+	장점: 새로고침없는 어플리케이션 제작 가능!!
+		마치 응용프로그램의 Rich UI를 제공 할수 있다..
+	단점: 
+	
+*/
+function getList() {
+	//서버측에 요청을 시도하되, 동기방식으로 시도하자!!
+	//location.href="/async/data.jsp"; //get방식 ->링크로 요청
+	
+	//비동기 요청을 시도하려면, ajax의 XMLHttpRequest 객체를 이용하면 된다
+	var xmlRequest = new XMLHttpRequest();
+	
+	//비동기 객체의 현재 상태를 알수있는 이벤트 핸들러를 이용하면
+	//통신의 종료시점등을 알고 프로그램에 적용 가능함!!
+	xmlRequest.onreadystatechange=function(){
+		/*
+		Holds the status of the XMLHttpRequest.
+		0: request not initialized : 요청 준비상태 (관심X)
+		1: server connection established : (서버의 접속함)
+		2: request received (요청이 서버에 도달됨) 관심X
+		3: processing request (요청을 처리중) 관심 X
+		4: request finished and response is ready (요청완료)관심 사항!!
+		*/
+		//서버로부터 응답을 받되, 그 응답이 성공이라면
+		if(this.readyState==4 && this.status==200){
+			//alert("서버로부터 받은 응답은 : "+this.responseText);
+			var json=JSON.parse(this.responseText);//스트링에 불과한 json문자열을 json객체로 파싱하는 과정
+			//alert(json.storeList[0].name);
+			printData(json);
+		}
+	};
+	//통신 준비
+	xmlRequest.open("GET","/async/data.jsp", true);
+	xmlRequest.send();
+}
+//서버로부터 응답받은 json문자열을 이용하여 화면 출력!
+function printData(json){
+	
+	var listArea = document.querySelector(".listArea");
+	var tag ="<table width=\"100%\" border=\"1px\">";
+	tag+="<tr>";
+	tag+="<td>No</td>";
+	tag+="<td>가게명</td>";
+	tag+="<td>연락처</td>";
+	tag+="<td>지역</td>";
+	tag+="<td>대표메뉴</td>";
+	tag+="</tr>";
+	var total = json.storeList.length;
+	for(var i=0; i<json.storeList.length; i++){
+		var obj = json.storeList[i];
+		
+		tag+="<tr>";
+		tag+="<td onClick=\"select("+obj.hotPlace_id+")\">"+total--+"</td>";
+		tag+="<td onClick=\"select("+obj.hotPlace_id+")\">"+obj.name+"</td>";
+		tag+="<td onClick=\"select("+obj.hotPlace_id+")\">"+obj.tel+"</td>";
+		tag+="<td onClick=\"select("+obj.hotPlace_id+")\">"+obj.addr+"</td>";
+		tag+="<td onClick=\"select("+obj.hotPlace_id+")\">"+obj.food+"</td>";
+		tag+="</tr>";
+	}
+	
+	
+	listArea.innerHTML=tag;
+}
+
+//평상시와는 달리 비동기 요청을 시도한다!!
+function regist(){
+	var xmlRequest = new XMLHttpRequest();
+	xmlRequest.open("POST","/async/regist.jsp", true);
+	//post방식의 경우 body 구성
+	xmlRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	var name= document.getElementById("name").value;
+	var tel= document.getElementById("tel").value;
+	var addr= document.getElementById("addr").value;
+	var food= document.getElementById("food").value;
+	
+	xmlRequest.send("name="+name+"&tel="+tel+"&addr="+addr+"&food="+food);	
+}
+function select(num){
+	var xmlRequest = new XMLHttpRequest();
+	xmlRequest.onreadystatechange= function(){
+		if(this.readyState==4 && this.status==200){
+			//console.log(this.responseText); //-> json받아오는지 확인!!
+			var json = JSON.parse(this.responseText);
+			printDataSingle(json);
+		}
+	}
+	xmlRequest.open("GET","/async/content.jsp?hotPlace_id="+num, true);
+	xmlRequest.send();
+}
+
+function printDataSingle(json){
+	var hotPlace_id2 = document.getElementById("hotPlace_id2");
+	var name2 = document.getElementById("name2");
+	var tel2 = document.getElementById("tel2");
+	var addr2 = document.getElementById("addr2");
+	var food2 = document.getElementById("food2");
+	
+	
+	//값을 입력해줌
+	hotPlace_id2.value = json.hotPlace_id;
+	name2.value = json.name;
+	tel2.value= json.tel;
+	addr2.value=json.addr;
+	food2.value=json.food;
+}
+
+function edit() {
+		var xmlRequest = new XMLHttpRequest();
+		xmlRequest.open("POST","/async/edit.jsp", true);
+		
+		xmlRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+		
+		var hotPlace_id = document.getElementById("hotPlace_id2").value;
+		var name= document.getElementById("name2").value;
+		var tel= document.getElementById("tel2").value;
+		var addr= document.getElementById("addr2").value;
+		var food= document.getElementById("food2").value;
+		
+		xmlRequest.onreadystatechange= function(){
+			if(this.readyState==4 && this.status==200){
+				//console.log(this.responseText); //-> json받아오는지 확인!!
+				alert(this.responseText);
+			}
+		}
+		//alert("hotPlace_id="+hotPlace_id+"&name="+name+"&tel="+tel+"&addr="+addr+"&food="+food);
+		xmlRequest.send("hotPlace_id="+hotPlace_id+"&name="+name+"&tel="+tel+"&addr="+addr+"&food="+food);
+	}
+function remove(){
+	var xmlRequest = new XMLHttpRequest();
+	xmlRequest.open("POST","/async/delete.jsp", true);
+	
+	xmlRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	var hotPlace_id = document.getElementById("hotPlace_id2").value;
+	xmlRequest.onreadystatechange= function(){
+		if(this.readyState==4 && this.status==200){
+			//console.log(this.responseText); //-> json받아오는지 확인!!
+			alert(this.responseText);
+		}
+	}
+	xmlRequest.send("hotPlace_id="+hotPlace_id);
+}
+
+ 
+</script>
+</head>
+<body>
+<div class="wrapper">
+	<div class="inputArea">
+		<input type="text" id="name" placeholder="가게명"/>
+		<input type="text" id="tel" placeholder="연락처"/>
+		<input type="text" id="addr" placeholder="지역"/>
+		<input type="text" id="food" placeholder="대표메뉴"/>
+		<button onclick="regist()">등록</button>
+		<button onclick="getList()">목록</button>
+	</div>
+	<div class="listArea"></div>
+	
+	<div class="detailArea">
+		<input type="hidden" id="hotPlace_id2"/>
+		<input type="text" id="name2"/>
+		<input type="text" id="tel2"/>
+		<input type="text" id="addr2"/>
+		<input type="text" id="food2"/>
+		<button onClick="edit()">수정</button>
+		<button onClick="remove()">삭제</button>
+	</div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
