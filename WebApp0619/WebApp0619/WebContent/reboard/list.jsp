@@ -1,11 +1,16 @@
+<%@page import="com.study.model.reboard.ReBoard"%>
+<%@page import="java.util.List"%>
+<%@page import="com.study.model.reboard.ReBoardDAO"%>
 <%@ page contentType="text/html; charset=UTF-8"%>
+<%!ReBoardDAO reboardDAO = new ReBoardDAO(); %>
 <%
+	List<ReBoard> boardList = reboardDAO.selectAll();
 	//페이징 처리에 필요한 변수 선언 및 페이지 분할 계산
 	int currentPage =1; //현재 페이지
 	if(request.getParameter("currentPage")!=null){
 		currentPage = Integer.parseInt(request.getParameter("currentPage"));
 	}
-	int totalRecord=26; //총 레코드 수
+	int totalRecord=boardList.size(); //총 레코드 수
 	int pageSize=10; //페이지당 보여질 레코드 수
 	int totalPage = (int)Math.ceil((float)totalRecord/pageSize);
 	int blockSize =10; //블럭당 보여질 페이지 수
