@@ -8,9 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.study.commons.db.DBManager;
+import com.study.commons.db.PoolManager;
 
 public class ReBoardDAO {
-	DBManager manager = DBManager.getInstance();
+	PoolManager manager = PoolManager.getInstance();
 	
 	//모두조회
 	public List selectAll() {
@@ -159,12 +160,59 @@ public class ReBoardDAO {
 		return result;
 	}
 
-	public int updateRank() {
-		return 0;
+	//아래의 쿼리는 반드시 일어나는것이 아니다
+	public int updateRank(ReBoard reBoard) {
+		int result=0;
+		
+		Connection con=null;
+		PreparedStatement pstmt=null;
+		String sql ="update reboard set rank= rank+1";
+		sql+= " where team =? and rank> ?";
+		
+		con=manager.getConnection();
+		try {
+			pstmt=con.prepareStatement(sql);
+			pstmt.setInt(1, reBoard.getTeam());
+			pstmt.setInt(2, reBoard.getRank());
+			result = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+		}
+		finally {
+			manager.freeConnection(con, pstmt);
+		}
+		
+		return result;
 	}
 	
-	public int reply() {
-		return 0;
+	public int reply(ReBoard reBoard) {
+		int result=0;
+		Connection con =null;
+		PreparedStatement pstmt = null;
+		String sql ="insert into reboard(reboard_id, title, writer, content,team,rank,depth)";
+		sql+=" values(seq_reboard.nextval,?,?,?,?,?,?)";
+		
+		con=manager.getConnection();
+		try {
+			pstmt=con.prepareStatement(sql);
+			pstmt.setString(1, reBoard.getTitle());
+			pstmt.setString(2, reBoard.getWriter());
+			pstmt.setString(3, reBoard.getContent());
+			pstmt.setInt(4, reBoard.getTeam());
+			pstmt.setInt(5, reBoard.getRank()+1);
+			pstmt.setInt(6, reBoard.getDepth()+1);
+			
+			result= pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			manager.freeConnection(con, pstmt);
+		}
+		//team : 내본글 team
+		//rank : 내본글 rank+1
+		//depth :내본글 depth+1
+		return result;
 	}
 }
 

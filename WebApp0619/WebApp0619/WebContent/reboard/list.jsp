@@ -16,7 +16,8 @@
 	int blockSize =10; //블럭당 보여질 페이지 수
 	int firstPage=currentPage-(currentPage-1)%blockSize; //블럭당 첫 페이지
 	int lastPage=firstPage+(blockSize-1);
-	int num=totalRecord-((currentPage-1)*pageSize); //페이지당 시작 번호
+	int curPos=(currentPage-1)*pageSize; //페이지당 시작 인덱스
+	int num=totalRecord-curPos; //페이지당 시작 번호
 %>
 <%="현재 페이지는 "+currentPage %>
 <!DOCTYPE html>
@@ -71,22 +72,24 @@ $(function(){
 		</tr>
 		<%for(int i=1; i<=pageSize; i++){%>
 		<%if(num<1)break; %>
+		<%ReBoard reboard=boardList.get(curPos++); %>
 		<tr>
 			<td><%=num-- %></td>
-			<td></td>
-			<td></td>
-			<td></td>
-			<td></td>
+			<td><a href="/reboard/content.jsp?reboard_id=<%=reboard.getReboard_id()%>"><%=reboard.getTitle() %></a>
+			</td>
+			<td><%=reboard.getWriter()%></td>
+			<td><%=reboard.getRegdate().substring(0,10)%></td>
+			<td><%=reboard.getHit()%></td>
 		</tr>
 		<%} %>
 		<tr>
 			<td colspan="5">
-				<button onClick="location.href='/comments/registForm.jsp';">글 등록</button>
+				<button onClick="location.href='/reboard/registForm.jsp';">글 등록</button>
 			</td>
 		</tr>
 		<tr>
 			<td colspan="5" style="text-align: center;">
-				<a href="/reboard/list.jsp">◀</a>
+				<a href="/reboard/list.js	p">◀</a>
 				<%for(int i=firstPage; i<=lastPage; i++){ %>
 				<%if(i>totalPage) break; %>
 				<a <%if(i==currentPage){ %> class="pageStyle"<%} %> href="/reboard/list.jsp?currentPage=<%=i %>">[<%=i %>]</a>
