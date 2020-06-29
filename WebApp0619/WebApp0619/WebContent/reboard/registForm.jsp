@@ -52,7 +52,7 @@ input[type=button]:hover {
 		$($("input[type='button']")[0]).click(function(){
 			//글 등록을 서버에 요청한다!! (jsp or servlet)
 			$("form").attr({
-				"action":"/comments/regist.jsp",
+				"action":"/reboard/regist.jsp",
 				"method":"post"
 			});
 			$("form").submit();
@@ -60,7 +60,7 @@ input[type=button]:hover {
 		
 		//목록버튼
 		$($("input[type='button']")[1]).click(function(){
-			location.href="/comments/list.jsp";
+			location.href="/reboard/list.jsp";
 		});
 		
 	});
